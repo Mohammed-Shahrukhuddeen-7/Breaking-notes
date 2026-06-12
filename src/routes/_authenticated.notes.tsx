@@ -18,7 +18,6 @@ export const Route = createFileRoute("/_authenticated/notes")({
 
 function NotesPage() {
   const { user } = Route.useRouteContext();
-  const qc2 = useQueryClient(); void qc2;
   const qc = useQueryClient();
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
