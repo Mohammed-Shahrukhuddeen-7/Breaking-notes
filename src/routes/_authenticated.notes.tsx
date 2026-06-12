@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef } from "react";
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/notes")({
 
 function NotesPage() {
   const { user } = Route.useRouteContext();
-  const navigate = useNavigate();
+  const qc2 = useQueryClient(); void qc2;
   const qc = useQueryClient();
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
@@ -335,7 +335,8 @@ function AiAssistantDialog({ onClose }: { onClose: () => void }) {
   const summaryFn = useServerFn(generateSummary);
   const quizFn = useServerFn(generateQuiz);
   const askFn = useServerFn(askAssistant);
-  const { data: usage } = useQuery({ queryKey: ["ai-usage"], queryFn: () => useServerFn(getAiUsage)({}) });
+  const usageFn = useServerFn(getAiUsage);
+  const { data: usage } = useQuery({ queryKey: ["ai-usage"], queryFn: () => usageFn({}) });
 
   async function run() {
     setLoading(true); setSummary(null); setAnswer(null); setQuiz(null);
