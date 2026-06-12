@@ -211,7 +211,7 @@ function NotesPage() {
                     <div className="min-w-0">
                       <div className="truncate font-medium">{n.file_name}</div>
                       <div className="text-xs text-muted-foreground">
-                        {n.tag} · {(n.file_size / 1024).toFixed(0)} KB · {new Date(n.created_at).toLocaleDateString()}
+                        {n.tag} · {((n.file_size ?? 0) / 1024).toFixed(0)} KB · {new Date(n.created_at).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
@@ -259,7 +259,7 @@ function EmptyState({ text }: { text: string }) {
 
 function UploadDialog({ semesterId, subjectId, userId, onClose, onUploaded }: { semesterId: string; subjectId: string; userId: string; onClose: () => void; onUploaded: () => void }) {
   const [file, setFile] = useState<File | null>(null);
-  const [tag, setTag] = useState<"notes" | "pyq" | "assignment" | "other">("notes");
+  const [tag, setTag] = useState<"notes" | "pyq" | "important" | "formula_sheet" | "lab_manual">("notes");
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -305,8 +305,8 @@ function UploadDialog({ semesterId, subjectId, userId, onClose, onUploaded }: { 
           <div>
             <label className="mb-1 block text-xs uppercase tracking-wider text-muted-foreground">Tag</label>
             <div className="flex flex-wrap gap-2">
-              {(["notes", "pyq", "assignment", "other"] as const).map((t) => (
-                <button key={t} onClick={() => setTag(t)} className={`rounded-full border px-3 py-1 text-xs ${tag === t ? "border-primary bg-primary/20 text-primary-glow" : "border-border text-muted-foreground"}`}>{t}</button>
+              {(["notes", "pyq", "important", "formula_sheet", "lab_manual"] as const).map((t) => (
+                <button key={t} onClick={() => setTag(t)} className={`rounded-full border px-3 py-1 text-xs ${tag === t ? "border-primary bg-primary/20 text-primary-glow" : "border-border text-muted-foreground"}`}>{t.replace("_", " ")}</button>
               ))}
             </div>
           </div>
