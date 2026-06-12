@@ -1,13 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { Play, Pause, RotateCcw, Sparkles, Timer as TimerIcon } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { completePomodoro } from "@/lib/rewards.functions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTimer } from "@/hooks/use-timer";
 
 export const Route = createFileRoute("/_authenticated/timer")({
   head: () => ({ meta: [{ title: "Timer — Breaking Notes" }] }),
@@ -15,18 +12,11 @@ export const Route = createFileRoute("/_authenticated/timer")({
 });
 
 const PRESETS = [25, 50] as const;
-type Preset = (typeof PRESETS)[number];
 
 function TimerPage() {
   const { user } = Route.useRouteContext();
-  const [duration, setDuration] = useState<Preset>(25);
-  const [remaining, setRemaining] = useState(25 * 60);
-  const [running, setRunning] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const qc = useQueryClient();
-  const completeFn = useServerFn(completePomodoro);
+  const { duration, remaining, running, setDuration, start, pause, reset } = useTimer();
 
-  // Sessions history
   const { data: sessions } = useQuery({
     queryKey: ["sessions", user.id],
     queryFn: async () => {
@@ -41,61 +31,6 @@ function TimerPage() {
     },
   });
 
-  useEffect(() => {
-    setRemaining(duration * 60);
-    setRunning(false);
-  }, [duration]);
-
-  useEffect(() => {
-    if (!running) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      return;
-    }
-    intervalRef.current = setInterval(() => {
-      setRemaining((r) => {
-        if (r <= 1) {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          setRunning(false);
-          handleComplete();
-          return 0;
-        }
-        return r - 1;
-      });
-    }, 1000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [running]);
-
-  async function handleComplete() {
-    playBell();
-    if ("Notification" in window && Notification.permission === "granted") {
-      new Notification("Pomodoro complete! 🎉", { body: `You finished a ${duration}-minute session.` });
-    }
-    try {
-      const res = await completeFn({ data: { durationMinutes: duration } });
-      toast.success(`+${res.points} points awarded!`, { description: "Streak updated 🔥" });
-      qc.invalidateQueries({ queryKey: ["sessions", user.id] });
-      qc.invalidateQueries({ queryKey: ["profile", user.id] });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to save session");
-    }
-    setRemaining(duration * 60);
-  }
-
-  function start() {
-    if (remaining === 0) setRemaining(duration * 60);
-    if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
-    }
-    setRunning(true);
-  }
-
-  function reset() {
-    setRunning(false);
-    setRemaining(duration * 60);
-  }
-
   const minutes = Math.floor(remaining / 60).toString().padStart(2, "0");
   const seconds = (remaining % 60).toString().padStart(2, "0");
   const progress = 1 - remaining / (duration * 60);
@@ -109,7 +44,7 @@ function TimerPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold">Pomodoro Timer</h1>
-          <p className="text-sm text-muted-foreground">Focus deeply. Earn points. Build your streak.</p>
+          <p className="text-sm text-muted-foreground">Keeps running even when you navigate away.</p>
         </div>
       </div>
 
@@ -164,7 +99,7 @@ function TimerPage() {
               <Play className="mr-2 h-4 w-4" /> {remaining === duration * 60 ? "Start" : "Resume"}
             </Button>
           ) : (
-            <Button size="lg" variant="outline" onClick={() => setRunning(false)}>
+            <Button size="lg" variant="outline" onClick={pause}>
               <Pause className="mr-2 h-4 w-4" /> Pause
             </Button>
           )}
@@ -203,18 +138,4 @@ function TimerPage() {
       </div>
     </div>
   );
-}
-
-function playBell() {
-  try {
-    const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.type = "sine"; o.frequency.value = 880;
-    g.gain.setValueAtTime(0.0001, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + 0.05);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.5);
-    o.start(); o.stop(ctx.currentTime + 1.5);
-  } catch { /* no-op */ }
 }

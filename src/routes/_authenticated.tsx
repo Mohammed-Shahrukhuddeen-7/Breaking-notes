@@ -19,11 +19,13 @@ import {
   Brain,
   Menu,
   X,
+  Shield,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { TimerProvider, useTimer } from "@/hooks/use-timer";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -35,15 +37,16 @@ export const Route = createFileRoute("/_authenticated")({
   component: AppShell,
 });
 
-const NAV = [
-  { to: "/timer", label: "Timer", icon: TimerIcon },
-  { to: "/notes", label: "Notes Vault", icon: BookOpen },
-  { to: "/deadlines", label: "Deadlines", icon: CalendarClock },
-  { to: "/leaderboard", label: "Leaderboard", icon: Trophy },
-  { to: "/profile", label: "Profile", icon: UserIcon },
-] as const;
-
 function AppShell() {
+  const { user } = Route.useRouteContext();
+  return (
+    <TimerProvider userId={user.id}>
+      <Shell />
+    </TimerProvider>
+  );
+}
+
+function Shell() {
   const { user } = Route.useRouteContext();
   const [mobileOpen, setMobileOpen] = useState(false);
   const nav = useNavigate();
@@ -65,6 +68,23 @@ function AppShell() {
     refetchOnWindowFocus: false,
   });
 
+  const { data: isAdmin } = useQuery({
+    queryKey: ["is-admin", user.id],
+    queryFn: async () => {
+      const { data } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      return data === true;
+    },
+  });
+
+  const nav_items = [
+    { to: "/timer", label: "Timer", icon: TimerIcon },
+    { to: "/notes", label: "Notes Vault", icon: BookOpen },
+    { to: "/deadlines", label: "Deadlines", icon: CalendarClock },
+    { to: "/leaderboard", label: "Leaderboard", icon: Trophy },
+    { to: "/profile", label: "Profile", icon: UserIcon },
+    ...(isAdmin ? [{ to: "/admin", label: "Admin", icon: Shield } as const] : []),
+  ] as const;
+
   async function signOut() {
     await supabase.auth.signOut();
     nav({ to: "/auth" });
@@ -72,7 +92,6 @@ function AppShell() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Mobile top bar */}
       <div className="fixed inset-x-0 top-0 z-40 flex items-center justify-between border-b border-sidebar-border bg-sidebar/95 px-4 py-3 backdrop-blur md:hidden">
         <Link to="/timer" className="flex items-center gap-2">
           <div className="grid h-8 w-8 place-items-center rounded-md gradient-primary">
@@ -80,12 +99,14 @@ function AppShell() {
           </div>
           <span className="font-semibold">Breaking Notes</span>
         </Link>
-        <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
-          <Menu className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <MiniTimer />
+          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar transition-transform md:translate-x-0",
@@ -108,7 +129,7 @@ function AppShell() {
         </div>
 
         <nav className="flex-1 space-y-1 px-3">
-          {NAV.map((item) => {
+          {nav_items.map((item) => {
             const active = pathname.startsWith(item.to);
             return (
               <Link
@@ -128,7 +149,6 @@ function AppShell() {
           })}
         </nav>
 
-        {/* Stats footer */}
         <div className="border-t border-sidebar-border p-4">
           <div className="mb-3 grid grid-cols-2 gap-2">
             <div className="rounded-lg border border-sidebar-border bg-sidebar-accent/40 p-3">
@@ -163,12 +183,50 @@ function AppShell() {
         <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* Main */}
       <main className="flex-1 md:ml-64">
         <div className="px-4 pb-10 pt-20 md:px-8 md:pt-8">
           <Outlet />
         </div>
       </main>
+
+      {/* Floating timer indicator (when running and not on timer page) */}
+      <FloatingTimer hidden={pathname.startsWith("/timer")} />
     </div>
+  );
+}
+
+function MiniTimer() {
+  const { running, remaining } = useTimer();
+  if (!running) return null;
+  const m = Math.floor(remaining / 60).toString().padStart(2, "0");
+  const s = (remaining % 60).toString().padStart(2, "0");
+  return (
+    <Link to="/timer" className="flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-1 text-xs font-semibold text-primary-glow">
+      <TimerIcon className="h-3 w-3" />{m}:{s}
+    </Link>
+  );
+}
+
+function FloatingTimer({ hidden }: { hidden: boolean }) {
+  const { running, remaining, pause, start } = useTimer();
+  if (hidden || (!running && remaining === 25 * 60)) return null;
+  const m = Math.floor(remaining / 60).toString().padStart(2, "0");
+  const s = (remaining % 60).toString().padStart(2, "0");
+  return (
+    <Link
+      to="/timer"
+      className="fixed bottom-4 right-4 z-30 hidden items-center gap-3 rounded-full border border-border bg-card/90 px-4 py-2.5 shadow-lg backdrop-blur md:flex"
+    >
+      <div className={cn("grid h-7 w-7 place-items-center rounded-full", running ? "gradient-primary" : "bg-muted")}>
+        <TimerIcon className="h-3.5 w-3.5 text-primary-foreground" />
+      </div>
+      <span className="font-display text-lg font-semibold tabular-nums">{m}:{s}</span>
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); running ? pause() : start(); }}
+        className="rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary-glow"
+      >
+        {running ? "Pause" : "Resume"}
+      </button>
+    </Link>
   );
 }
