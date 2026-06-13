@@ -1,19 +1,42 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Shield, Trash2 } from "lucide-react";
+import { Shield, ShieldAlert, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — Breaking Notes" }] }),
-  beforeLoad: async ({ context }) => {
-    const { user } = context as { user: { id: string } };
-    const { data } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
-    if (data !== true) throw redirect({ to: "/timer" });
-  },
-  component: AdminPage,
+  component: AdminGate,
 });
+
+function AdminGate() {
+  const { user } = Route.useRouteContext();
+  const { data: isAdmin, isLoading } = useQuery({
+    queryKey: ["is-admin", user.id],
+    queryFn: async () => {
+      const { data } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      return data === true;
+    },
+  });
+
+  if (isLoading) return <div className="p-8 text-sm text-muted-foreground">Checking access…</div>;
+  if (!isAdmin) {
+    return (
+      <div className="mx-auto mt-20 max-w-md rounded-3xl border border-border bg-card/60 p-10 text-center">
+        <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-destructive/15">
+          <ShieldAlert className="h-7 w-7 text-destructive" />
+        </div>
+        <h1 className="text-2xl font-bold">Access Denied</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          You need administrator privileges to view this page.
+        </p>
+        <Button asChild className="mt-6"><Link to="/timer">Back to app</Link></Button>
+      </div>
+    );
+  }
+  return <AdminPage />;
+}
 
 function AdminPage() {
   const { data: stats } = useQuery({
