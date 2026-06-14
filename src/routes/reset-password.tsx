@@ -97,7 +97,8 @@ function ResetPassword() {
           disabled={loading || checkingSession || !canReset}
           className="mt-6 w-full gradient-primary text-primary-foreground"
         >
-          {(loading || checkingSession) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Update password
+          {(loading || checkingSession) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Update password
         </Button>
       </form>
     </div>
