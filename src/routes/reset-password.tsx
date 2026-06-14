@@ -33,7 +33,10 @@ function ResetPassword() {
         if (error) toast.error(error.message);
         window.history.replaceState({}, document.title, window.location.pathname);
       } else if (accessToken && refreshToken) {
-        const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
         if (error) toast.error(error.message);
         window.history.replaceState({}, document.title, window.location.pathname);
       }
@@ -66,19 +69,34 @@ function ResetPassword() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
-      <form onSubmit={onSubmit} className="w-full max-w-sm rounded-2xl border border-border bg-card/80 p-6 backdrop-blur">
+      <form
+        onSubmit={onSubmit}
+        className="w-full max-w-sm rounded-2xl border border-border bg-card/80 p-6 backdrop-blur"
+      >
         <h1 className="mb-2 text-xl font-semibold">Set a new password</h1>
         <p className="mb-6 text-sm text-muted-foreground">
-          {canReset ? "Enter your new password below." : "Open the latest reset link from your email to continue."}
+          {canReset
+            ? "Enter your new password below."
+            : "Open the latest reset link from your email to continue."}
         </p>
         <div className="space-y-2">
           <Label htmlFor="password">New password</Label>
           <div className="relative">
             <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input id="password" name="password" type="password" required className="pl-9" disabled={checkingSession || !canReset} />
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              required
+              className="pl-9"
+              disabled={checkingSession || !canReset}
+            />
           </div>
         </div>
-        <Button disabled={loading || checkingSession || !canReset} className="mt-6 w-full gradient-primary text-primary-foreground">
+        <Button
+          disabled={loading || checkingSession || !canReset}
+          className="mt-6 w-full gradient-primary text-primary-foreground"
+        >
           {(loading || checkingSession) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Update password
         </Button>
       </form>
