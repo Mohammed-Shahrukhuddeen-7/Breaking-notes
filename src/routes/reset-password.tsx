@@ -37,7 +37,8 @@ function ResetPassword() {
       const code = url.searchParams.get("code");
       const accessToken = hashParams.get("access_token");
       const refreshToken = hashParams.get("refresh_token");
-      const tokenHash = url.searchParams.get("token_hash") ?? hashParams.get("token_hash");
+      const tokenHash =
+        url.searchParams.get("token_hash") ?? hashParams.get("token_hash");
       const type = url.searchParams.get("type") ?? hashParams.get("type");
       const linkError = url.searchParams.get("error_description") ?? hashParams.get("error_description");
 
@@ -67,7 +68,11 @@ function ResetPassword() {
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
       setCanReset(Boolean(data.session));
-      setStatusMessage(data.session ? "Enter your new password below." : "Open the latest reset link from your email to continue.");
+      setStatusMessage(
+        data.session
+          ? "Enter your new password below."
+          : "Open the latest reset link from your email to continue.",
+      );
       setCheckingSession(false);
     }
 
@@ -86,7 +91,9 @@ function ResetPassword() {
     const { data } = await supabase.auth.getSession();
     if (!data.session) {
       setCanReset(false);
-      setStatusMessage("This reset link was not activated. Please request a new link and open it in this same browser.");
+      setStatusMessage(
+        "This reset link was not activated. Please request a new link and open it in this same browser.",
+      );
       return toast.error("Open the newest reset link from your email first.");
     }
     setLoading(true);
@@ -105,9 +112,7 @@ function ResetPassword() {
         className="w-full max-w-sm rounded-2xl border border-border bg-card/80 p-6 backdrop-blur"
       >
         <h1 className="mb-2 text-xl font-semibold">Set a new password</h1>
-        <p className="mb-6 text-sm text-muted-foreground">
-          {statusMessage}
-        </p>
+        <p className="mb-6 text-sm text-muted-foreground">{statusMessage}</p>
         <div className="space-y-2">
           <Label htmlFor="password">New password</Label>
           <div className="relative">
