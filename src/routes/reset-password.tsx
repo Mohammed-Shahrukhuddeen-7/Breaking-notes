@@ -37,10 +37,10 @@ function ResetPassword() {
       const code = url.searchParams.get("code");
       const accessToken = hashParams.get("access_token");
       const refreshToken = hashParams.get("refresh_token");
-      const tokenHash =
-        url.searchParams.get("token_hash") ?? hashParams.get("token_hash");
+      const tokenHash = url.searchParams.get("token_hash") ?? hashParams.get("token_hash");
       const type = url.searchParams.get("type") ?? hashParams.get("type");
-      const linkError = url.searchParams.get("error_description") ?? hashParams.get("error_description");
+      const linkError =
+        url.searchParams.get("error_description") ?? hashParams.get("error_description");
 
       if (linkError) toast.error(linkError);
 
