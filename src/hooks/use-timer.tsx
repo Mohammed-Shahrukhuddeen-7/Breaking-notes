@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -36,8 +44,6 @@ export function TimerProvider({ children, userId }: { children: ReactNode; userI
       setRemaining((r) => {
         if (r <= 1) {
           if (intervalRef.current) clearInterval(intervalRef.current);
-          setRunning(false);
-          void handleComplete();
           return 0;
         }
         return r - 1;
@@ -46,19 +52,30 @@ export function TimerProvider({ children, userId }: { children: ReactNode; userI
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running]);
 
-  async function handleComplete() {
+  const handleComplete = useCallback(async () => {
     if (completingRef.current) return;
     completingRef.current = true;
     playBell();
-    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-      new Notification("Pomodoro complete! 🎉", { body: `You finished a ${duration}-minute session.` });
+    if (
+      typeof window !== "undefined" &&
+      "Notification" in window &&
+      Notification.permission === "granted"
+    ) {
+      new Notification("Pomodoro complete! 🎉", {
+        body: `You finished a ${duration}-minute session.`,
+      });
     }
     try {
       const res = await completeFn({ data: { durationMinutes: duration } });
       toast.success(`+${res.points} points awarded!`, { description: "Streak updated 🔥" });
+      qc.setQueryData(["sessions", userId], (current: (typeof res.session)[] | undefined) =>
+        [res.session, ...(current ?? []).filter((session) => session.id !== res.session.id)].slice(
+          0,
+          10,
+        ),
+      );
       qc.invalidateQueries({ queryKey: ["sessions", userId] });
       qc.invalidateQueries({ queryKey: ["profile", userId] });
     } catch (e) {
@@ -67,7 +84,15 @@ export function TimerProvider({ children, userId }: { children: ReactNode; userI
       setRemaining(duration * 60);
       completingRef.current = false;
     }
-  }
+  }, [completeFn, duration, qc, userId]);
+
+  useEffect(() => {
+    if (remaining === 0 && running) setRunning(false);
+  }, [remaining, running]);
+
+  useEffect(() => {
+    if (remaining === 0 && !running) void handleComplete();
+  }, [handleComplete, remaining, running]);
 
   function setDuration(d: Preset) {
     setDurationState(d);
@@ -77,13 +102,19 @@ export function TimerProvider({ children, userId }: { children: ReactNode; userI
 
   function start() {
     if (remaining === 0) setRemaining(duration * 60);
-    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+    if (
+      typeof window !== "undefined" &&
+      "Notification" in window &&
+      Notification.permission === "default"
+    ) {
       Notification.requestPermission();
     }
     setRunning(true);
   }
 
-  function pause() { setRunning(false); }
+  function pause() {
+    setRunning(false);
+  }
 
   function reset() {
     setRunning(false);
@@ -105,16 +136,27 @@ export function useTimer() {
 
 function playBell() {
   try {
-    const Ctor = (window as unknown as { AudioContext: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext
-      ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const Ctor =
+      (
+        window as unknown as {
+          AudioContext: typeof AudioContext;
+          webkitAudioContext?: typeof AudioContext;
+        }
+      ).AudioContext ??
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     const ctx = new Ctor();
     const o = ctx.createOscillator();
     const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.type = "sine"; o.frequency.value = 880;
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.type = "sine";
+    o.frequency.value = 880;
     g.gain.setValueAtTime(0.0001, ctx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + 0.05);
     g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.5);
-    o.start(); o.stop(ctx.currentTime + 1.5);
-  } catch { /* no-op */ }
+    o.start();
+    o.stop(ctx.currentTime + 1.5);
+  } catch {
+    /* no-op */
+  }
 }

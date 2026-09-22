@@ -19,6 +19,7 @@ function TimerPage() {
 
   const { data: sessions } = useQuery({
     queryKey: ["sessions", user.id],
+    refetchOnMount: "always",
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pomodoro_sessions")
@@ -31,7 +32,9 @@ function TimerPage() {
     },
   });
 
-  const minutes = Math.floor(remaining / 60).toString().padStart(2, "0");
+  const minutes = Math.floor(remaining / 60)
+    .toString()
+    .padStart(2, "0");
   const seconds = (remaining % 60).toString().padStart(2, "0");
   const progress = 1 - remaining / (duration * 60);
   const circumference = 2 * Math.PI * 130;
@@ -44,7 +47,9 @@ function TimerPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold">Pomodoro Timer</h1>
-          <p className="text-sm text-muted-foreground">Keeps running even when you navigate away.</p>
+          <p className="text-sm text-muted-foreground">
+            Keeps running even when you navigate away.
+          </p>
         </div>
       </div>
 
@@ -65,7 +70,14 @@ function TimerPage() {
 
         <div className="relative mx-auto mb-8 grid h-72 w-72 place-items-center">
           <svg className="absolute inset-0 -rotate-90" viewBox="0 0 300 300">
-            <circle cx="150" cy="150" r="130" stroke="oklch(0.28 0.03 280)" strokeWidth="10" fill="none" />
+            <circle
+              cx="150"
+              cy="150"
+              r="130"
+              stroke="oklch(0.28 0.03 280)"
+              strokeWidth="10"
+              fill="none"
+            />
             <circle
               cx="150"
               cy="150"
@@ -86,7 +98,9 @@ function TimerPage() {
             </defs>
           </svg>
           <div className="text-center">
-            <div className="font-display text-6xl font-bold tabular-nums">{minutes}:{seconds}</div>
+            <div className="font-display text-6xl font-bold tabular-nums">
+              {minutes}:{seconds}
+            </div>
             <div className="mt-2 text-xs uppercase tracking-widest text-muted-foreground">
               {running ? "Focusing" : remaining === duration * 60 ? "Ready" : "Paused"}
             </div>
@@ -95,7 +109,11 @@ function TimerPage() {
 
         <div className="flex justify-center gap-3">
           {!running ? (
-            <Button size="lg" onClick={start} className="gradient-primary text-primary-foreground hover:opacity-90 glow">
+            <Button
+              size="lg"
+              onClick={start}
+              className="gradient-primary text-primary-foreground hover:opacity-90 glow"
+            >
               <Play className="mr-2 h-4 w-4" /> {remaining === duration * 60 ? "Start" : "Resume"}
             </Button>
           ) : (
@@ -110,18 +128,25 @@ function TimerPage() {
       </div>
 
       <div className="mt-8">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Recent sessions</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Recent sessions
+        </h2>
         {sessions && sessions.length > 0 ? (
           <ul className="space-y-2">
             {sessions.map((s) => (
-              <li key={s.id} className="flex items-center justify-between rounded-lg border border-border bg-card/40 px-4 py-3">
+              <li
+                key={s.id}
+                className="flex items-center justify-between rounded-lg border border-border bg-card/40 px-4 py-3"
+              >
                 <div className="flex items-center gap-3">
                   <div className="grid h-8 w-8 place-items-center rounded-md bg-accent/40">
                     <TimerIcon className="h-4 w-4 text-primary-glow" />
                   </div>
                   <div>
                     <div className="text-sm font-medium">{s.duration_minutes}-minute session</div>
-                    <div className="text-xs text-muted-foreground">{new Date(s.completed_at).toLocaleString()}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(s.completed_at).toLocaleString()}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 text-sm font-semibold text-primary-glow">
