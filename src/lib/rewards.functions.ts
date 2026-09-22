@@ -58,7 +58,11 @@ export const completeTask = createServerFn({ method: "POST" })
 
     const { error: uErr } = await supabaseAdmin
       .from("tasks")
-      .update({ status: "completed", completed_at: new Date().toISOString(), points_awarded: points })
+      .update({
+        status: "completed",
+        completed_at: new Date().toISOString(),
+        points_awarded: points,
+      })
       .eq("id", task.id);
     if (uErr) throw new Error(uErr.message);
 
