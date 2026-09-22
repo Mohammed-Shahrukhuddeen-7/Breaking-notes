@@ -19,6 +19,7 @@ function TimerPage() {
 
   const { data: sessions } = useQuery({
     queryKey: ["sessions", user.id],
+    refetchOnMount: "always",
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pomodoro_sessions")

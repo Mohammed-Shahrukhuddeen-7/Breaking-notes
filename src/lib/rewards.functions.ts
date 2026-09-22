@@ -15,11 +15,15 @@ export const completePomodoro = createServerFn({ method: "POST" })
     const points = data.durationMinutes === 25 ? 10 : 20;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { error: sessErr } = await supabaseAdmin.from("pomodoro_sessions").insert({
-      user_id: userId,
-      duration_minutes: data.durationMinutes,
-      points_awarded: points,
-    });
+    const { data: session, error: sessErr } = await supabaseAdmin
+      .from("pomodoro_sessions")
+      .insert({
+        user_id: userId,
+        duration_minutes: data.durationMinutes,
+        points_awarded: points,
+      })
+      .select("id, user_id, duration_minutes, points_awarded, completed_at")
+      .single();
     if (sessErr) throw new Error(sessErr.message);
 
     const { data: prof, error: rpcErr } = await supabaseAdmin.rpc("award_points_and_streak", {
@@ -28,7 +32,7 @@ export const completePomodoro = createServerFn({ method: "POST" })
     });
     if (rpcErr) throw new Error(rpcErr.message);
 
-    return { points, profile: prof };
+    return { points, profile: prof, session };
   });
 
 const TaskCompleteInput = z.object({ taskId: z.string().uuid() });
