@@ -24,7 +24,7 @@ const taskSchema = z.object({
   title: z.string().trim().min(1).max(200),
   description: z.string().max(2000).optional(),
   subject: z.string().max(100).optional(),
-  due_date: z.coerce.date({ error: "Please enter a valid due date" }),
+  due_date: z.coerce.date({ invalid_type_error: "Please enter a valid due date" }),
   difficulty: z.enum(["easy", "medium", "hard"]),
 });
 
