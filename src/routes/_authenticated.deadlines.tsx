@@ -24,7 +24,10 @@ const taskSchema = z.object({
   title: z.string().trim().min(1).max(200),
   description: z.string().max(2000).optional(),
   subject: z.string().max(100).optional(),
-  due_date: z.string().min(1),
+  due_date: z
+    .string()
+    .min(1, "Please pick a due date and time")
+    .refine((v) => !Number.isNaN(new Date(v).getTime()), "Please enter a valid date and time"),
   difficulty: z.enum(["easy", "medium", "hard"]),
 });
 
