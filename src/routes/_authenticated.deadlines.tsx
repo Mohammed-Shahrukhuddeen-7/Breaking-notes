@@ -24,10 +24,7 @@ const taskSchema = z.object({
   title: z.string().trim().min(1).max(200),
   description: z.string().max(2000).optional(),
   subject: z.string().max(100).optional(),
-  due_date: z
-    .string()
-    .min(1, "Please pick a due date and time")
-    .refine((v) => !Number.isNaN(new Date(v).getTime()), "Please enter a valid date and time"),
+  due_date: z.coerce.date({ error: "Please enter a valid due date" }),
   difficulty: z.enum(["easy", "medium", "hard"]),
 });
 
@@ -53,18 +50,21 @@ function DeadlinesPage() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    // Normalize: some browsers submit date-only ("YYYY-MM-DD") from datetime-local
+    const rawDate = String(fd.get("due_date") ?? "").trim();
+    const normalizedDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? `${rawDate}T00:00` : rawDate;
     const parsed = taskSchema.safeParse({
       title: fd.get("title"),
       description: fd.get("description") || undefined,
       subject: fd.get("subject") || undefined,
-      due_date: fd.get("due_date"),
+      due_date: normalizedDate,
       difficulty: fd.get("difficulty"),
     });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     setSaving(true);
     const { error } = await supabase.from("tasks").insert({
       ...parsed.data,
-      due_date: new Date(parsed.data.due_date).toISOString(),
+      due_date: parsed.data.due_date.toISOString(),
       user_id: user.id,
     });
     setSaving(false);
