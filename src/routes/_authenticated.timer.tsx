@@ -74,7 +74,7 @@ function TimerPage() {
               cx="150"
               cy="150"
               r="130"
-              stroke="oklch(0.28 0.03 280)"
+              stroke="oklch(0.27 0 0)"
               strokeWidth="10"
               fill="none"
             />
@@ -92,8 +92,8 @@ function TimerPage() {
             />
             <defs>
               <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="oklch(0.66 0.20 285)" />
-                <stop offset="1" stopColor="oklch(0.78 0.18 300)" />
+                <stop offset="0" stopColor="oklch(0.98 0 0)" />
+                <stop offset="1" stopColor="oklch(0.62 0 0)" />
               </linearGradient>
             </defs>
           </svg>
