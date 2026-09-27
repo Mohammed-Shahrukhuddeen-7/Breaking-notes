@@ -7,7 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/profile")({
-  head: () => ({ meta: [{ title: "Profile — Breaking Notes" }] }),
+  head: () => ({ meta: [
+    { title: "Study Profile — Breaking Notes" },
+    { name: "description", content: "Review your study points, focus sessions, completed tasks, and streaks." },
+    { property: "og:title", content: "Study Profile — Breaking Notes" },
+    { property: "og:description", content: "Review your study points, focus sessions, completed tasks, and streaks." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: ProfilePage,
 });
 

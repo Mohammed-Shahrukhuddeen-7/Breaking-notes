@@ -71,8 +71,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Breaking Notes — Study smarter" },
-      { name: "description", content: "Pomodoro timer, shared notes vault, deadlines, streaks & AI study assistant." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

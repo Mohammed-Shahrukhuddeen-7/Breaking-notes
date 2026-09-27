@@ -106,6 +106,84 @@
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
 }
 
+.night-sky {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.night-sky-stars {
+  position: absolute;
+  inset: 0;
+  opacity: 0.62;
+  background-image:
+    radial-gradient(circle at 17px 29px, var(--foreground) 0.7px, transparent 1.3px),
+    radial-gradient(circle at 41px 19px, var(--foreground) 1px, transparent 1.7px),
+    radial-gradient(circle at 73px 61px, var(--foreground) 0.65px, transparent 1.2px),
+    radial-gradient(circle at 31px 87px, var(--foreground) 0.8px, transparent 1.4px);
+  background-size: 67px 83px, 109px 127px, 157px 139px, 211px 193px;
+  background-position: 0 0, 32px 47px, 71px 21px, 119px 83px;
+  animation: star-twinkle 8s ease-in-out infinite alternate;
+}
+
+.night-sky-stars::after {
+  position: absolute;
+  top: 17%;
+  left: 9%;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--foreground);
+  box-shadow:
+    173px 96px 0 0 var(--foreground),
+    387px 31px 0 0 var(--foreground),
+    548px 222px 0 0 var(--foreground),
+    716px 82px 0 0 var(--foreground),
+    903px 254px 0 0 var(--foreground),
+    1088px 127px 0 0 var(--foreground),
+    81px 423px 0 0 var(--foreground),
+    326px 519px 0 0 var(--foreground),
+    621px 402px 0 0 var(--foreground),
+    847px 586px 0 0 var(--foreground),
+    1127px 472px 0 0 var(--foreground);
+  filter: drop-shadow(0 0 3px var(--foreground));
+  content: "";
+  opacity: 0.76;
+}
+
+.night-moon {
+  position: absolute;
+  top: 19%;
+  right: clamp(1.5rem, 6vw, 6rem);
+  width: clamp(4.5rem, 8vw, 7rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--foreground);
+  box-shadow: 0 0 24px color-mix(in oklab, var(--foreground) 22%, transparent);
+}
+
+.night-moon::before {
+  position: absolute;
+  top: -8%;
+  left: -34%;
+  width: 88%;
+  height: 88%;
+  border-radius: 50%;
+  background: var(--background);
+  content: "";
+}
+
+@keyframes star-twinkle {
+  from { opacity: 0.48; }
+  to { opacity: 0.78; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .night-sky-stars { animation: none; }
+}
+
 @utility gradient-primary {
   background-image: linear-gradient(135deg, var(--color-primary), var(--color-primary-glow));
 }

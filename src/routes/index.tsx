@@ -4,6 +4,14 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
+  head: () => ({ meta: [
+    { title: "Breaking Notes — Focused Study Workspace" },
+    { name: "description", content: "Build focus sessions, organize course notes, track deadlines, and compare study streaks." },
+    { property: "og:title", content: "Breaking Notes — Focused Study Workspace" },
+    { property: "og:description", content: "Build focus sessions, organize course notes, track deadlines, and compare study streaks." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   beforeLoad: async () => {
     if (typeof window === "undefined") return;
     const { data } = await supabase.auth.getSession();
@@ -37,7 +45,7 @@ function Landing() {
           Study smarter with <span className="text-gradient">Breaking Notes</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          Pomodoro timer, shared notes vault, deadline tracker, leaderboard, daily streaks, and an AI study assistant — in one dark, focused workspace.
+          Pomodoro timer, shared notes vault, deadline tracker, leaderboard, and daily streaks — in one focused workspace.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <Link to="/auth">
@@ -51,7 +59,6 @@ function Landing() {
           {[
             { icon: Timer, title: "Pomodoro Timer", desc: "25 & 50 min sessions, points & streaks." },
             { icon: BookOpen, title: "Notes Vault", desc: "Shared PDFs by semester & subject." },
-            { icon: Brain, title: "AI Assistant", desc: "Summaries & quizzes from your notes." },
             { icon: Trophy, title: "Leaderboard", desc: "Compete live with your peers." },
           ].map((f) => (
             <div key={f.title} className="rounded-xl border border-border bg-card/60 p-5 text-left backdrop-blur">

@@ -1,18 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useState, useRef } from "react";
-import { BookOpen, ChevronRight, Upload, Sparkles, Download, FileText, FileImage, Brain, X, Loader2, Plus, Trash2 } from "lucide-react";
+import { BookOpen, ChevronRight, Upload, Sparkles, Download, FileText, FileImage, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { generateSummary, generateQuiz, askAssistant, getAiUsage } from "@/lib/ai.functions";
 
 export const Route = createFileRoute("/_authenticated/notes")({
-  head: () => ({ meta: [{ title: "Notes Vault — Breaking Notes" }] }),
+  head: () => ({ meta: [
+    { title: "Notes Vault — Breaking Notes" },
+    { name: "description", content: "Browse shared course notes organized by semester and subject." },
+    { property: "og:title", content: "Notes Vault — Breaking Notes" },
+    { property: "og:description", content: "Browse shared course notes organized by semester and subject." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: NotesPage,
 });
 
@@ -22,7 +26,6 @@ function NotesPage() {
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [aiOpen, setAiOpen] = useState(false);
 
   const { data: isAdmin } = useQuery({
     queryKey: ["is-admin", user.id],
@@ -107,12 +110,9 @@ function NotesPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Notes Vault</h1>
-            <p className="text-sm text-muted-foreground">Browse semester & subject notes — powered by AI.</p>
+            <p className="text-sm text-muted-foreground">Browse notes by semester and subject.</p>
           </div>
         </div>
-        <Button onClick={() => setAiOpen(true)} className="gradient-primary text-primary-foreground glow">
-          <Brain className="mr-2 h-4 w-4" /> AI Assistant
-        </Button>
       </div>
 
       {/* Breadcrumbs */}
@@ -242,8 +242,6 @@ function NotesPage() {
           onUploaded={() => qc.invalidateQueries({ queryKey: ["notes", selectedSubject] })}
         />
       )}
-
-      {aiOpen && <AiAssistantDialog onClose={() => setAiOpen(false)} />}
     </div>
   );
 }
@@ -321,114 +319,3 @@ function UploadDialog({ semesterId, subjectId, userId, onClose, onUploaded }: { 
   );
 }
 
-type QuizQ = { q: string; options: string[]; answer_index: number; explanation?: string };
-
-function AiAssistantDialog({ onClose }: { onClose: () => void }) {
-  const [tab, setTab] = useState<"summary" | "quiz" | "ask">("summary");
-  const [text, setText] = useState("");
-  const [question, setQuestion] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [summary, setSummary] = useState<string | null>(null);
-  const [answer, setAnswer] = useState<string | null>(null);
-  const [quiz, setQuiz] = useState<QuizQ[] | null>(null);
-  const summaryFn = useServerFn(generateSummary);
-  const quizFn = useServerFn(generateQuiz);
-  const askFn = useServerFn(askAssistant);
-  const usageFn = useServerFn(getAiUsage);
-  const { data: usage } = useQuery({ queryKey: ["ai-usage"], queryFn: () => usageFn({}) });
-
-  async function run() {
-    setLoading(true); setSummary(null); setAnswer(null); setQuiz(null);
-    try {
-      if (tab === "summary") {
-        const r = await summaryFn({ data: { text } });
-        setSummary(r.summary);
-      } else if (tab === "quiz") {
-        const r = await quizFn({ data: { text, numQuestions: 5 } });
-        setQuiz(r.questions);
-      } else {
-        const r = await askFn({ data: { question, context: text || undefined } });
-        setAnswer(r.answer);
-      }
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "AI failed");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto bg-card sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Brain className="h-5 w-5 text-primary-glow" /> AI Study Assistant</DialogTitle>
-        </DialogHeader>
-        <div className="mb-3 flex gap-2">
-          {(["summary", "quiz", "ask"] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)} className={`rounded-full px-3 py-1 text-xs capitalize ${tab === t ? "gradient-primary text-primary-foreground" : "border border-border text-muted-foreground"}`}>{t === "ask" ? "Ask" : t}</button>
-          ))}
-        </div>
-        {usage && <div className="mb-2 text-xs text-muted-foreground">Daily AI usage: {usage.used} / {usage.limit}</div>}
-        <div className="space-y-3">
-          {tab === "ask" && (
-            <Input placeholder="Ask anything (e.g. Explain Newton's third law)" value={question} onChange={(e) => setQuestion(e.target.value)} />
-          )}
-          <Textarea
-            rows={6}
-            placeholder={tab === "ask" ? "(Optional) Paste reference notes for context" : "Paste your notes / textbook text here…"}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <Button onClick={run} disabled={loading || (tab === "ask" ? !question : text.length < 20)} className="w-full gradient-primary text-primary-foreground">
-            {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Thinking…</> : <><Sparkles className="mr-2 h-4 w-4" /> {tab === "summary" ? "Summarize" : tab === "quiz" ? "Generate quiz" : "Ask"}</>}
-          </Button>
-          {summary && <div className="prose prose-invert max-w-none whitespace-pre-wrap rounded-lg border border-border bg-background/40 p-4 text-sm">{summary}</div>}
-          {answer && <div className="prose prose-invert max-w-none whitespace-pre-wrap rounded-lg border border-border bg-background/40 p-4 text-sm">{answer}</div>}
-          {quiz && <Quiz questions={quiz} />}
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={onClose}><X className="mr-2 h-4 w-4" /> Close</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function Quiz({ questions }: { questions: QuizQ[] }) {
-  const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [submitted, setSubmitted] = useState(false);
-  const score = Object.entries(answers).filter(([i, v]) => questions[Number(i)].answer_index === v).length;
-  return (
-    <div className="space-y-4">
-      {questions.map((q, i) => (
-        <div key={i} className="rounded-lg border border-border bg-background/40 p-4">
-          <div className="mb-2 text-sm font-medium">{i + 1}. {q.q}</div>
-          <div className="space-y-1.5">
-            {q.options.map((opt, j) => {
-              const picked = answers[i] === j;
-              const correct = submitted && q.answer_index === j;
-              const wrong = submitted && picked && q.answer_index !== j;
-              return (
-                <button
-                  key={j}
-                  onClick={() => !submitted && setAnswers((a) => ({ ...a, [i]: j }))}
-                  className={`block w-full rounded-md border px-3 py-1.5 text-left text-sm transition ${
-                    correct ? "border-success bg-success/10" :
-                    wrong ? "border-destructive bg-destructive/10" :
-                    picked ? "border-primary bg-primary/10" : "border-border"
-                  }`}
-                >{opt}</button>
-              );
-            })}
-          </div>
-          {submitted && q.explanation && <div className="mt-2 text-xs text-muted-foreground">💡 {q.explanation}</div>}
-        </div>
-      ))}
-      {!submitted ? (
-        <Button onClick={() => setSubmitted(true)} disabled={Object.keys(answers).length !== questions.length} className="w-full gradient-primary text-primary-foreground">Submit</Button>
-      ) : (
-        <div className="rounded-lg border border-primary/40 bg-primary/10 p-3 text-center text-sm font-semibold">Score: {score} / {questions.length}</div>
-      )}
-    </div>
-  );
-}

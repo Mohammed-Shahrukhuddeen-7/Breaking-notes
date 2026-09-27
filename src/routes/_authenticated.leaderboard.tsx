@@ -7,7 +7,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/leaderboard")({
-  head: () => ({ meta: [{ title: "Leaderboard — Breaking Notes" }] }),
+  head: () => ({ meta: [
+    { title: "Study Leaderboard — Breaking Notes" },
+    { name: "description", content: "Compare study points and daily streaks with the Breaking Notes community." },
+    { property: "og:title", content: "Study Leaderboard — Breaking Notes" },
+    { property: "og:description", content: "Compare study points and daily streaks with the Breaking Notes community." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: LeaderboardPage,
 });
 
@@ -48,7 +55,6 @@ function LeaderboardPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold">Leaderboard</h1>
-          <p className="text-sm text-muted-foreground">Live ranking · updates as people study.</p>
         </div>
       </div>
 
