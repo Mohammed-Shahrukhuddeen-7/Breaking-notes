@@ -11,7 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Sign in — Breaking Notes" }] }),
+  head: () => ({ meta: [
+    { title: "Sign in — Breaking Notes" },
+    { name: "description", content: "Sign in or create an account to open your Breaking Notes study workspace." },
+    { property: "og:title", content: "Sign in — Breaking Notes" },
+    { property: "og:description", content: "Sign in or create an account to open your Breaking Notes study workspace." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: AuthPage,
 });
 

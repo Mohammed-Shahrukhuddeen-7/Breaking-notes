@@ -6,7 +6,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin — Breaking Notes" }] }),
+  head: () => ({ meta: [
+    { title: "Administration — Breaking Notes" },
+    { name: "description", content: "Manage the Breaking Notes semesters, subjects, and shared notes." },
+    { property: "og:title", content: "Administration — Breaking Notes" },
+    { property: "og:description", content: "Manage the Breaking Notes semesters, subjects, and shared notes." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: AdminGate,
 });
 

@@ -29,6 +29,7 @@ import { TimerProvider, useTimer } from "@/hooks/use-timer";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
+  staleTime: 60_000,
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
@@ -92,6 +93,10 @@ function Shell() {
 
   return (
     <div className="flex min-h-screen">
+      <div className="night-sky" aria-hidden="true">
+        <div className="night-sky-stars" />
+        <div className="night-moon" />
+      </div>
       <div className="fixed inset-x-0 top-0 z-40 flex items-center justify-between border-b border-sidebar-border bg-sidebar/95 px-4 py-3 backdrop-blur md:hidden">
         <Link to="/timer" className="flex items-center gap-2">
           <div className="grid h-8 w-8 place-items-center rounded-md gradient-primary">
@@ -183,7 +188,7 @@ function Shell() {
         <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
-      <main className="flex-1 md:ml-64">
+      <main className="relative z-10 flex-1 md:ml-64">
         <div className="px-4 pb-10 pt-20 md:px-8 md:pt-8">
           <Outlet />
         </div>

@@ -16,7 +16,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/deadlines")({
-  head: () => ({ meta: [{ title: "Deadlines — Breaking Notes" }] }),
+  head: () => ({ meta: [
+    { title: "Deadlines — Breaking Notes" },
+    { name: "description", content: "Organize upcoming assignments and keep track of due dates." },
+    { property: "og:title", content: "Deadlines — Breaking Notes" },
+    { property: "og:description", content: "Organize upcoming assignments and keep track of due dates." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: DeadlinesPage,
 });
 
