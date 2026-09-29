@@ -2,4 +2,5 @@
 - [ ] Remove previously requested timer and leaderboard helper text and Recent sessions section.
 - [ ] Improve section navigation with short-lived query freshness and intent preloading.
 - [ ] Add persistent stars and a right-side moon behind authenticated sections.
+- [ ] Animate the stars shifting when switching between app sections.
 - [ ] Verify preview and confirm the build is clean.
