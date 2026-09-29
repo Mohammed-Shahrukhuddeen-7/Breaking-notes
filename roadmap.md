@@ -4,3 +4,4 @@
 - [x] Add persistent stars and a right-side moon behind authenticated sections.
 - [x] Animate the stars shifting when switching between app sections.
 - [x] Verify preview and confirm the build is clean.
+- [ ] Add a persistent light/dark theme switch next to the app branding.
