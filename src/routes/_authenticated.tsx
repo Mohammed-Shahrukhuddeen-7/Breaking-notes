@@ -93,7 +93,7 @@ function Shell() {
 
   return (
     <div className="flex min-h-screen">
-      <div className="night-sky" aria-hidden="true">
+      <div className="night-sky" data-section={pathname.split("/")[1] ?? "timer"} aria-hidden="true">
         <div className="night-sky-stars" />
         <div className="night-moon" />
       </div>

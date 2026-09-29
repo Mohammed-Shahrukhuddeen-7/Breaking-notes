@@ -1,5 +1,6 @@
-- [ ] Remove AI Assistant UI and outdated AI promotional copy.
-- [ ] Remove previously requested timer and leaderboard helper text and Recent sessions section.
-- [ ] Improve section navigation with short-lived query freshness and intent preloading.
-- [ ] Add persistent stars and a right-side moon behind authenticated sections.
-- [ ] Verify preview and confirm the build is clean.
+- [x] Remove AI Assistant UI and outdated AI promotional copy.
+- [x] Remove previously requested timer and leaderboard helper text and Recent sessions section.
+- [x] Improve section navigation with short-lived query freshness and intent preloading.
+- [x] Add persistent stars and a right-side moon behind authenticated sections.
+- [x] Animate the stars shifting when switching between app sections.
+- [x] Verify preview and confirm the build is clean.
