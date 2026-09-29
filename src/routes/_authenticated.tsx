@@ -20,12 +20,15 @@ import {
   Menu,
   X,
   Shield,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { TimerProvider, useTimer } from "@/hooks/use-timer";
+import { useTheme } from "@/hooks/use-theme";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -52,6 +55,7 @@ function Shell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const nav = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => setMobileOpen(false), [pathname]);
 
@@ -105,6 +109,9 @@ function Shell() {
           <span className="font-semibold">Breaking Notes</span>
         </Link>
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
           <MiniTimer />
           <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
             <Menu className="h-5 w-5" />
@@ -128,6 +135,9 @@ function Shell() {
               <div className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">Study OS</div>
             </div>
           </Link>
+          <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(false)}>
             <X className="h-5 w-5" />
           </Button>
