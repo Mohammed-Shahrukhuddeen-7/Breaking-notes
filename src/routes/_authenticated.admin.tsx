@@ -50,7 +50,7 @@ function AdminPage() {
     queryKey: ["admin-stats"],
     queryFn: async () => {
       const [u, n, s, sj] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("notes").select("*", { count: "exact", head: true }),
         supabase.from("semesters").select("*", { count: "exact", head: true }),
         supabase.from("subjects").select("*", { count: "exact", head: true }),

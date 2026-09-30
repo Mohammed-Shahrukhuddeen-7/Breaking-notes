@@ -26,7 +26,7 @@ function ProfilePage() {
   const { data: profile, refetch } = useQuery({
     queryKey: ["profile", user.id],
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+      const { data } = await supabase.from("profiles").select("id, username, avatar_url, total_points, current_streak, best_streak, last_active_date, created_at, updated_at").eq("id", user.id).maybeSingle();
       return data;
     },
   });
@@ -93,7 +93,7 @@ function ProfilePage() {
           </div>
           <div className="flex-1 text-center sm:text-left">
             <h2 className="text-2xl font-bold">{profile?.username}</h2>
-            <p className="text-sm text-muted-foreground">{profile?.email}</p>
+            <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
         </div>
 
