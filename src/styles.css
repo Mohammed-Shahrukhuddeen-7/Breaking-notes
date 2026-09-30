@@ -211,18 +211,9 @@
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--foreground);
+  -webkit-mask-image: radial-gradient(circle at 29% 37%, transparent 0 47%, #000 48%);
+  mask-image: radial-gradient(circle at 29% 37%, transparent 0 47%, #000 48%);
   box-shadow: 0 0 24px color-mix(in oklab, var(--foreground) 22%, transparent);
-}
-
-.night-moon::before {
-  position: absolute;
-  top: -8%;
-  left: -34%;
-  width: 88%;
-  height: 88%;
-  border-radius: 50%;
-  background: var(--background);
-  content: "";
 }
 
 @keyframes star-twinkle {
