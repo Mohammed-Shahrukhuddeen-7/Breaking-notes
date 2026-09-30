@@ -11,5 +11,3 @@ Breaking Notes is a study workspace for keeping study sessions, course notes, de
 - **Profile** — View your study progress and account details.
 - **Admin tools** — Manage Notes Vault content and other administrative features.
 - **Light and dark themes** — Switch between the two appearances from the navigation area.
-
-The AI study assistant, including Gemini-powered summaries, quizzes, and flashcards, is not part of the current app.
