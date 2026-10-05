@@ -38,7 +38,7 @@ jobs:
       - name: Build
         run: npm run build
       
-       - name: Check output
+      - name: Check output
         run: find .output/public -maxdepth 2 -type f
 
       - name: Setup Pages
