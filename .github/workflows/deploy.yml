@@ -37,6 +37,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Check index
+        run: ls -la .output/public
       
       - name: Check output
         run: find .output/public -maxdepth 2 -type f
